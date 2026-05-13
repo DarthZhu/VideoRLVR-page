@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>VideoRLVR: RL Recipe for Video Reasoning Model</title>
+    <meta
+      name="description"
+      content="Project page for VideoRLVR, an RL recipe for video reasoning."
+    >
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#">RL Recipe for Video Reasoning</a>
+      <nav aria-label="Project sections">
+        <a href="#abstract">Overview</a>
+        <a href="#method">Recipe</a>
+        <a href="#results">Results</a>
+        <a href="#resources">Resources</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <!-- <div class="hero-media" aria-hidden="true">
+          <img src="assets/figure-teaser.png" alt="">
+          <div class="media-scrim"></div>
+        </div> -->
+        <div class="hero-content">
+          <h1>VideoRLVR<br>an RL Recipe for <br>Video Reasoning Model</h1>
+          <p class="dek">
+            A systematic recipe for turning video diffusion models from visual
+            imitators into verifiable reasoners through reward-driven training.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="assets/paper.pdf">Paper</a>
+            <a class="button" href="../neurips_submission/README.md">Code</a>
+            <a class="button" href="../neurips_submission/README.md">Model</a>
+            <a class="button" href="#bibtex">BibTeX</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="paper-meta section-tight">
+        <div>
+          <span class="label">Training Tasks</span>
+          <strong>Verifiable puzzle domains: Maze, FlowFree, Sokoban</strong>
+        </div>
+        <div>
+          <span class="label">Model Family</span>
+          <strong>Wan2.2-TI2V-5B video diffusion model</strong>
+        </div>
+        <div>
+          <span class="label">Core Finding</span>
+          <strong>VideoRLVR improves in-domain reasoning and generalizes to OOD settings such as VBVR-OOD.</strong>
+        </div>
+      </section>
+
+      <section id="abstract" class="section abstract-section">
+        <div class="section-heading">
+          <p class="eyebrow">Overview</p>
+          <h2>Reasoning needs more than plausible pixels.</h2>
+        </div>
+        <div class="two-column">
+          <p>
+            Modern video diffusion models can produce convincing motion, yet
+            they still struggle with functional correctness: paths can cross
+            walls, objects can violate temporal logic, and generated videos can
+            look right while failing the underlying task. This suggests an analogy 
+            to reasoning-oriented LLMs where pre-training provides broad generative 
+            competence, SFT teaches the format of reasoning traces, and
+            RLVR is the essential third stage required to optimize objective correctness.
+          </p>
+          <p>
+            We build a multi-task video reasoning setting with training pipeline
+            that combines rule-based trajectory generation, SDE-GRPO optimization,
+            and an Early-Step Focus strategy that reduces training time by about 40% 
+            while preserving the performance. VideoRLVR improves over sft and 
+            competitive proprietary and open-source video generation 
+            models on three domains, while also demonstrating impressive generalization in 
+            out-of-domain on VBVR.
+          </p>
+        </div>
+        <figure class="paper-figure abstract-teaser">
+          <img src="assets/figure-teaser.png" alt="Overview">
+        </figure>
+      </section>
+
+      <section id="method" class="section recipe-section">
+        <div class="section-heading">
+          <p class="eyebrow">Recipe</p>
+          <h2>From imitation to reward-grounded generation</h2>
+        </div>
+        <div class="method-block">
+          <div class="method-list">
+            <article>
+              <span>01</span>
+              <h3>Data Curation</h3>
+              <p>Synthesize task instances with rule-based
+                  planners that sample an initial configuration, solve it with a valid action sequence, and render the
+                  state trajectory into a video.</p>
+            </article>
+            <article>
+              <span>02</span>
+              <h3>Start with SFT</h3>
+              <p>Use the ground truth trajectories to build a strong visual prior before reward optimization.</p>
+            </article>
+            <article>
+              <span>03</span>
+              <h3>Early-Step Focus with SDE-GRPO</h3>
+              <p>Only inject SDE noise and do backpropagation at early steps, where 
+                exploration happens, and long-range structure is determined.</p>
+            </article>
+            <article>
+              <span>04</span>
+              <h3>Dense Verifiable Reward</h3>
+              <p>Decompose each task into structural components that measure partial progress toward a valid solution.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="results" class="section results-section">
+        <div class="section-heading">
+          <p class="eyebrow">Results</p>
+          <h2>Main results</h2>
+        </div>
+        <!-- <div class="results-grid">
+          <article class="metric">
+            <span class="metric-value">84.4</span>
+            <span class="metric-label">Maze F1</span>
+            <p>Ours in the paper's main benchmark table.</p>
+          </article>
+          <article class="metric">
+            <span class="metric-value">44.0</span>
+            <span class="metric-label">FlowFree F1</span>
+            <p>Ours improves over the SFT baselines.</p>
+          </article>
+          <article class="metric">
+            <span class="metric-value">29.4</span>
+            <span class="metric-label">Sokoban F1</span>
+            <p>Ours in the paper's main benchmark table.</p>
+          </article>
+        </div> -->
+
+        <div class="table-wrap" role="region" aria-label="Main results table" tabindex="0">
+          <table class="benchmark-table">
+            <!-- <caption>
+              Comparison of our method with other baselines. We report Precision
+              (Prec), Recall (Rec), F1, and Success Rate (SR).
+              <strong>Bold</strong> indicates the best and
+              <span class="second-best">underlined</span> indicates second best.
+            </caption> -->
+            <thead>
+              <tr>
+                <th rowspan="2">Model</th>
+                <th colspan="4">Maze</th>
+                <th colspan="4">FlowFree</th>
+                <th colspan="4">Sokoban</th>
+              </tr>
+              <tr>
+                <th>Prec</th>
+                <th>Rec</th>
+                <th>F1</th>
+                <th>SR</th>
+                <th>Prec</th>
+                <th>Rec</th>
+                <th>F1</th>
+                <th>SR</th>
+                <th>Prec</th>
+                <th>Rec</th>
+                <th>F1</th>
+                <th>SR</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="group-row">
+                <td colspan="13">Proprietary Models</td>
+              </tr>
+              <tr>
+                <td>Sora 2</td>
+                <td>15.8</td>
+                <td>17.2</td>
+                <td>16.5</td>
+                <td>3.1</td>
+                <td>10.8</td>
+                <td>5.1</td>
+                <td>5.8</td>
+                <td>0.0</td>
+                <td>8.5</td>
+                <td>4.8</td>
+                <td>5.4</td>
+                <td>0.0</td>
+              </tr>
+              <tr>
+                <td>Kling V3</td>
+                <td>24.8</td>
+                <td>15.7</td>
+                <td>19.2</td>
+                <td>23.5</td>
+                <td>18.8</td>
+                <td>2.7</td>
+                <td>4.7</td>
+                <td>0.0</td>
+                <td>5.7</td>
+                <td>2.7</td>
+                <td>3.7</td>
+                <td>0.0</td>
+              </tr>
+              <tr>
+                <td>Veo 3.1</td>
+                <td>22.8</td>
+                <td>18.1</td>
+                <td>20.2</td>
+                <td>26.0</td>
+                <td>23.9</td>
+                <td>4.7</td>
+                <td>7.5</td>
+                <td><span class="second-best">4.0</span></td>
+                <td>22.2</td>
+                <td>6.0</td>
+                <td>9.4</td>
+                <td>0.0</td>
+              </tr>
+              <tr class="group-row">
+                <td colspan="13">Open-Source Models</td>
+              </tr>
+              <tr>
+                <td>CogVideoX1.5</td>
+                <td>13.3</td>
+                <td>10.8</td>
+                <td>11.9</td>
+                <td>0.0</td>
+                <td>18.7</td>
+                <td>2.2</td>
+                <td>3.9</td>
+                <td>0.0</td>
+                <td>3.2</td>
+                <td>0.3</td>
+                <td>0.5</td>
+                <td>0.0</td>
+              </tr>
+              <tr>
+                <td>HunyuanVideo</td>
+                <td>17.3</td>
+                <td>11.4</td>
+                <td>13.8</td>
+                <td>2.2</td>
+                <td>12.5</td>
+                <td>2.9</td>
+                <td>4.8</td>
+                <td>0.0</td>
+                <td>8.2</td>
+                <td>2.7</td>
+                <td>3.2</td>
+                <td>0.0</td>
+              </tr>
+              <tr>
+                <td>Wan2.2-TI2V-5B</td>
+                <td>18.3</td>
+                <td>12.2</td>
+                <td>14.6</td>
+                <td>0.0</td>
+                <td>17.4</td>
+                <td>2.0</td>
+                <td>3.4</td>
+                <td>0.0</td>
+                <td>4.1</td>
+                <td>0.7</td>
+                <td>1.0</td>
+                <td>0.0</td>
+              </tr>
+              <tr class="group-row">
+                <td colspan="13">SFT Models</td>
+              </tr>
+              <tr>
+                <td>Wan-R1</td>
+                <td>20.9</td>
+                <td>65.6</td>
+                <td>31.7</td>
+                <td>31.9</td>
+                <td>20.9</td>
+                <td>3.6</td>
+                <td>6.1</td>
+                <td>0.0</td>
+                <td>7.7</td>
+                <td>2.1</td>
+                <td>3.3</td>
+                <td>0.0</td>
+              </tr>
+              <tr>
+                <td>VBVR-Wan2.2</td>
+                <td>62.7</td>
+                <td>77.8</td>
+                <td>69.4</td>
+                <td>60.8</td>
+                <td>17.9</td>
+                <td>5.6</td>
+                <td>8.5</td>
+                <td>1.7</td>
+                <td>16.2</td>
+                <td>1.7</td>
+                <td>3.1</td>
+                <td>0.0</td>
+              </tr>
+              <tr>
+                <td>SFT Epoch 5</td>
+                <td>80.2</td>
+                <td>83.0</td>
+                <td>81.6</td>
+                <td>66.1</td>
+                <td>42.8</td>
+                <td>42.2</td>
+                <td>42.4</td>
+                <td>2.4</td>
+                <td>33.6</td>
+                <td>11.9</td>
+                <td>17.6</td>
+                <td><span class="second-best">2.9</span></td>
+              </tr>
+              <tr>
+                <td>SFT Epoch 10</td>
+                <td>80.4</td>
+                <td>85.1</td>
+                <td>82.7</td>
+                <td><span class="second-best">69.0</span></td>
+                <td>43.1</td>
+                <td>42.5</td>
+                <td>42.8</td>
+                <td>2.5</td>
+                <td>32.8</td>
+                <td>11.6</td>
+                <td>17.1</td>
+                <td>2.7</td>
+              </tr>
+              <tr class="group-row">
+                <td colspan="13">RL Model</td>
+              </tr>
+              <tr class="highlight-row">
+                <td><strong>VideoRLVR</strong></td>
+                <td>82.1</td>
+                <td>86.9</td>
+                <td>84.4</td>
+                <td><strong>72.2</strong></td>
+                <td>44.3</td>
+                <td>43.8</td>
+                <td>44.0</td>
+                <td><strong>7.9</strong></td>
+                <td>34.0</td>
+                <td>12.5</td>
+                <td>29.4</td>
+                <td><strong>6.1</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="subsection-heading">
+          <p class="eyebrow">OOD Evaluation</p>
+          <h3>VBVR-OOD Results</h3>
+        </div>
+        <div class="table-wrap ood-table-wrap" role="region" aria-label="VBVR-OOD evaluation table" tabindex="0">
+          <table class="ood-table">
+            <!-- <caption>
+              <strong>OOD evaluation on VBVR.</strong> We report average
+              performance and category-wise scores on the VBVR-OOD split.
+            </caption> -->
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Avg.</th>
+                <th>Abst.</th>
+                <th>Know.</th>
+                <th>Perc.</th>
+                <th>Spat.</th>
+                <th>Trans.</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="group-row">
+                <td colspan="7">5B Models</td>
+              </tr>
+              <tr>
+                <td>CogVideoX1.5</td>
+                <td>26.2</td>
+                <td>28.1</td>
+                <td>23.5</td>
+                <td>25.0</td>
+                <td>25.4</td>
+                <td>28.2</td>
+              </tr>
+              <tr class="highlight-row">
+                <td><strong>VideoRLVR</strong></td>
+                <td><span class="second-best">60.2</span></td>
+                <td><span class="second-best">65.5</span></td>
+                <td><strong>62.0</strong></td>
+                <td><strong>59.7</strong></td>
+                <td><span class="second-best">58.8</span></td>
+                <td><span class="second-best">58.2</span></td>
+              </tr>
+              <tr class="group-row">
+                <td colspan="7">14B Models</td>
+              </tr>
+              <tr>
+                <td>Wan2.2-I2V-A14B</td>
+                <td>32.9</td>
+                <td>40.5</td>
+                <td>30.8</td>
+                <td>34.3</td>
+                <td>23.6</td>
+                <td>30.7</td>
+              </tr>
+              <tr>
+                <td>VBVR-Wan2.2</td>
+                <td><strong>61.0</strong></td>
+                <td><strong>76.8</strong></td>
+                <td><span class="second-best">57.2</span></td>
+                <td><span class="second-best">54.7</span></td>
+                <td><strong>61.8</strong></td>
+                <td><strong>61.5</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="subsection-heading">
+          <p class="eyebrow">LLM Comparison</p>
+          <h3>Maze task comparison with LLMs</h3>
+        </div>
+        <div class="table-wrap llm-table-wrap" role="region" aria-label="LLM comparison table" tabindex="0">
+          <table class="llm-table">
+            <!-- <caption>Comparison with LLMs on maze tasks.</caption> -->
+            <thead>
+              <tr>
+                <th rowspan="2">Model</th>
+                <th colspan="4">Maze</th>
+              </tr>
+              <tr>
+                <th>Prec</th>
+                <th>Rec</th>
+                <th>F1</th>
+                <th>SR</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>GPT 4o</td>
+                <td>11.7</td>
+                <td>13.0</td>
+                <td>12.3</td>
+                <td>0.0</td>
+              </tr>
+              <tr>
+                <td>GPT 5.5 Pro</td>
+                <td>76.0</td>
+                <td>70.1</td>
+                <td>72.9</td>
+                <td>66.0</td>
+              </tr>
+              <tr>
+                <td>Gemini 2.5 Flash</td>
+                <td>11.2</td>
+                <td>10.5</td>
+                <td>10.9</td>
+                <td>0.0</td>
+              </tr>
+              <tr>
+                <td>Gemini 3.1 Pro</td>
+                <td>26.8</td>
+                <td>27.0</td>
+                <td>26.9</td>
+                <td>23.0</td>
+              </tr>
+              <tr class="highlight-row">
+                <td><strong>VideoRLVR</strong></td>
+                <td><strong>82.1</strong></td>
+                <td><strong>86.9</strong></td>
+                <td><strong>84.4</strong></td>
+                <td><strong>72.2</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="resources" class="section resources">
+        <div class="section-heading centered">
+          <p class="eyebrow">Resources</p>
+          <h2>Paper, code, and models</h2>
+        </div>
+        <div class="resource-grid">
+          <a href="assets/paper.pdf">
+            <span>PDF</span>
+            <strong>Read the paper</strong>
+          </a>
+          <a href="../neurips_submission/README.md">
+            <span>Code</span>
+            <strong>Training and evaluation package</strong>
+          </a>
+          <a href="../figures">
+            <span>Models</span>
+            <strong>Use trained models</strong>
+          </a>
+        </div>
+        <div id="bibtex" class="bibtex">
+          <div class="bibtex-heading">
+            <h3>BibTeX</h3>
+          </div>
+          <pre><code>@inproceedings{rlrecipe2026video,
+  title = {RL Recipe for Video Reasoning Model},
+  author = {Anonymous},
+  booktitle = {Advances in Neural Information Processing Systems},
+  year = {2026}
+}</code></pre>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>RL Recipe for Video Reasoning Model</p>
+    </footer>
+  </body>
+</html>
