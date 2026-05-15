@@ -141,6 +141,30 @@ h1 {
   letter-spacing: 0;
 }
 
+.authors {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  max-width: 720px;
+  margin-bottom: 20px;
+  color: #3d4852;
+  font-size: clamp(1rem, 1.8vw, 1.22rem);
+  font-weight: 720;
+}
+
+.authors a {
+  color: var(--blue);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+}
+
+.authors span {
+  color: var(--muted);
+  font-weight: 650;
+}
+
 .dek {
   max-width: 720px;
   margin-bottom: 34px;
